@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    container_name: javascript-vite-devcontainer
+    ports:
+      - "5175:5173"  # Puerto para Vite (maquina:contenedor)
+    volumes:
+      - .:/app
+      - /app/node_modules  # Evita sobreescribir node_modules del contenedor
+    working_dir: /app
+    command: sleep infinity  # Mantiene el contenedor corriendo
+    environment:
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true

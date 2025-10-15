@@ -1,0 +1,30 @@
+{
+  "name": "javascript-vite-devcontainer",
+  "version": "1.0.0",
+  "description": "Proyecto JavaScript con Vite en DevContainer para estudiantes",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "tailwindcss": "^4.1.0",
+    "@tailwindcss/vite": "^4.1.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0"
+  },
+  "keywords": [
+    "javascript",
+    "vite",
+    "devcontainer",
+    "educacion"
+  ],
+  "author": "Isaías FL",
+  "license": "MIT"
+}
