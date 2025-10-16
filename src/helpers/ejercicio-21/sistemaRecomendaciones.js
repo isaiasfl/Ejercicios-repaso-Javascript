@@ -50,7 +50,7 @@ export const calcularSimilitudUsuarios = (idUsuario1, idUsuario2) => {
   if (!usuario1 || !usuario2) {
     return;
   }
-  if(idUsuario1 === idUsuario2){
+  if (idUsuario1 === idUsuario2) {
     return 1;
   }
 
@@ -91,4 +91,27 @@ export const calcularSimilitudUsuarios = (idUsuario1, idUsuario2) => {
     similitudCiudad * 0.15;
 
   return Number(similitudTotal);
+};
+
+/**
+ * @author Sergio
+ * @description Devuelve los N usuarios más similares al usuario dado
+ * @param {number} idUsuario - ID del usuario de referencia
+ * @param {number} limite - Número máximo de usuarios a devolver
+ * @returns {Array} Array de objetos con { usuario, similitud }
+ */
+export const obtenerUsuariosSimilares = (idUsuario, limite = 1) => {
+  const usuarioReferencia = usuarios.find((u) => u.id === idUsuario);
+  if (!usuarioReferencia) {
+    return [];
+  }
+
+  return usuarios
+    .filter((u) => u.id !== idUsuario)
+    .map((u) => ({
+      usuario: u,
+      similitud: calcularSimilitudUsuarios(idUsuario, u.id),
+    }))
+    .sort((primerUser, segundoUser) => segundoUser.similitud - primerUser.similitud)
+    .slice(0, limite);
 };
