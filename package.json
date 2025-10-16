@@ -26,5 +26,14 @@
     "educacion"
   ],
   "author": "Isaías FL",
-  "license": "MIT"
+  "license": "MIT",
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esthermaroto/Ejercicios-repaso-Javascript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/esthermaroto/Ejercicios-repaso-Javascript/issues"
+  },
+  "homepage": "https://github.com/esthermaroto/Ejercicios-repaso-Javascript#readme"
 }
