@@ -112,6 +112,94 @@ export const obtenerUsuariosSimilares = (idUsuario, limite = 1) => {
       usuario: u,
       similitud: calcularSimilitudUsuarios(idUsuario, u.id),
     }))
-    .sort((primerUser, segundoUser) => segundoUser.similitud - primerUser.similitud)
+    .sort(
+      (primerUser, segundoUser) => segundoUser.similitud - primerUser.similitud
+    )
     .slice(0, limite);
+};
+
+/**
+ * @author Sergio
+ * @description Genera recomendaciones de productos para un usuario basadas en varios criterios
+ * @param {number} idUsuario - ID del usuario objetivo
+ * @param {number} numeroRecomendaciones - Número máximo de productos a recomendar
+ * @returns {Array} Array de productos recomendados
+ */
+export const generarRecomendaciones = (
+  idUsuario,
+  numeroRecomendaciones = 5
+) => {
+  const usuario = usuarios.find((u) => u.id === idUsuario);
+  if (!usuario) {
+    return [];
+  }
+  const patrones = analizarPatronesCompra();
+  const pedidosUsuario = pedidos.filter((p) => p.idUsuario === idUsuario);
+  const productosComprados = new Set();
+  pedidosUsuario.forEach((pedido) => {
+    pedido.productos.forEach((p) => productosComprados.add(p.idProducto));
+  });
+
+  const similares = obtenerUsuariosSimilares(idUsuario, 5);
+  const productosSimilares = nuevosProductosDeUsuariosSimilares(
+    similares,
+    productosComprados
+  );
+
+  const categoriasUsuario = patrones.get(usuario.nombre)
+    ? Object.keys(patrones.get(usuario.nombre))
+    : [];
+  const productosCategorias = productos.filter(
+    (p) =>
+      categoriasUsuario.includes(p.categoría) &&
+      p.valoracion >= 4.5 &&
+      !productosComprados.has(p.id)
+  );
+
+  const productosHobbies = productos.filter(
+    (p) =>
+      p.destacado &&
+      usuario.hobbies.some((h) => p.etiquetas.includes(h.toLowerCase())) &&
+      !productosComprados.has(p.id)
+  );
+
+  const recomendacionesSet = new Map();
+  [...productosSimilares, ...productosCategorias, ...productosHobbies].forEach(
+    (p) => {
+      recomendacionesSet.set(p.id, p);
+    }
+  );
+
+  const recomendaciones = Array.from(recomendacionesSet.values())
+    .sort(
+      (primerProducto, segundoProducto) =>
+        segundoProducto.valoracion - primerProducto.valoracion
+    )
+    .slice(0, numeroRecomendaciones);
+
+  return recomendaciones;
+};
+
+/**
+ * @description Auxiliar para generarRecomendaciones: devuelve productos comprados por usuarios similares que el usuario objetivo no ha comprado
+ */
+const nuevosProductosDeUsuariosSimilares = (
+  usuariosSimilares,
+  productosComprados
+) => {
+  const productosNuevos = [];
+
+  usuariosSimilares.forEach(({ usuario }) => {
+    const pedidosUsuario = pedidos.filter((p) => p.idUsuario === usuario.id);
+    pedidosUsuario.forEach((pedido) => {
+      pedido.productos.forEach((p) => {
+        if (!productosComprados.has(p.idProducto)) {
+          const producto = productos.find((prod) => prod.id === p.idProducto);
+          if (producto) productosNuevos.push(producto);
+        }
+      });
+    });
+  });
+
+  return productosNuevos;
 };
