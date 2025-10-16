@@ -254,14 +254,8 @@ export const obtenerEstadisticasRecomendaciones = () => {
  * @param {number} idUsuario - ID del usuario objetivo
  * @returns {Array} Array de productos recomendados actualizados
  */
-export const actualizarRecomendaciones = (
-  idUsuario,
-  numeroRecomendaciones = 5
-) => {
-  const recomendacionesActualizadas = generarRecomendaciones(
-    idUsuario,
-    numeroRecomendaciones
-  );
+export const actualizarRecomendaciones = (idUsuario) => {
+  const recomendacionesActualizadas = generarRecomendaciones(idUsuario);
   return recomendacionesActualizadas;
 };
 
@@ -315,4 +309,106 @@ export const explicarRecomendacion = (idUsuario, idProducto) => {
   }
 
   return 'Recomendación del sistema';
+};
+
+/**
+ * @author Sergio
+ * @description Identifica productos y categorías más populares entre usuarios similares
+ * @returns {Object} Contiene productos y categorías más populares
+ */
+export const obtenerTendencias = () => {
+  const productosContador = new Map();
+  const categoriasContador = new Map();
+
+  usuarios.forEach(usuario => {
+    const similares = obtenerUsuariosSimilares(usuario.id, 5);
+
+    similares.forEach(({ usuario: u }) => {
+      const pedidosUsuario = pedidos.filter(p => p.idUsuario === u.id);
+      pedidosUsuario.forEach(pedido => {
+        pedido.productos.forEach(p => {
+          const producto = productos.find(prod => prod.id === p.idProducto);
+          if (!producto) return;
+
+          productosContador.set(
+            producto.nombre,
+            (productosContador.get(producto.nombre) || 0) + p.cantidad
+          );
+
+          categoriasContador.set(
+            producto.categoría,
+            (categoriasContador.get(producto.categoría) || 0) + p.cantidad
+          );
+        });
+      });
+    });
+  });
+
+  const limite = 5;
+  const productosPopulares = [...productosContador.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limite)
+    .map(([nombre]) => nombre);
+
+  const categoriasPopulares = [...categoriasContador.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limite)
+    .map(([nombre]) => nombre);
+
+  return {
+    productos: productosPopulares,
+    categorias: categoriasPopulares
+  };
+};
+
+/**
+ * @author Sergio
+ * @description Guarda las recomendaciones generadas para un usuario en localStorage
+ * @param {number} idUsuario - ID del usuario objetivo
+ */
+export const guardarRecomendacionesLocalStorage = (idUsuario) => {
+  const recomendaciones = generarRecomendaciones(idUsuario);
+  
+  if (!recomendaciones || recomendaciones.length === 0) return;
+
+  localStorage.setItem(
+    `recomendaciones_usuario_${idUsuario}`,
+    JSON.stringify(recomendaciones)
+  );
+};
+
+/**
+ * @author Sergio
+ * @description Simula el porcentaje de recomendaciones que podrían ser aceptadas por los usuarios
+ * @returns {Object} Contiene porcentaje promedio y detalles por usuario
+ */
+export const compararEfectividad = () => {
+  const resultados = [];
+
+  usuarios.forEach(usuario => {
+    const recomendaciones = generarRecomendaciones(usuario.id, 5);
+
+    if (recomendaciones.length === 0) return;
+
+    const aceptadas = recomendaciones.filter(p => p.stock > 0 && p.valoracion >= 4.0).length;
+
+    const porcentajeAceptacion = (aceptadas / recomendaciones.length) * 100;
+
+    resultados.push({
+      usuario: usuario.nombre,
+      totalRecomendaciones: recomendaciones.length,
+      aceptadas,
+      porcentajeAceptacion: Number(porcentajeAceptacion)
+    });
+  });
+
+  const promedioAceptacion =
+    resultados.length > 0
+      ? resultados.reduce((total, r) => total + r.porcentajeAceptacion, 0) / resultados.length
+      : 0;
+
+  return {
+    promedioAceptacion: Number(promedioAceptacion),
+    detalles: resultados
+  };
 };
