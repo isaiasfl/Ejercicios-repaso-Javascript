@@ -105,7 +105,27 @@ export function tablaDatos(){
     });
   }
   
+  /**
+   * 
+   * @param {Array<Object>} datos - Array de objetos  a exportar
+   * @param {string} formato - Formato de exportación
+   * @returns {string} - String con los datos formateados
+   */
   function exportarTabla(datos,formato){
+    // Validar que datos sea un array válido y no esté vacío
+    if(!Array.isArray(datos) || datos.length===0) return '';
+    // Validar que formato sea un string válido y no esté vacío
+    if(typeof formato !=='string' ||formato.trim()==='')return '';
+    // Normalizar el formato: eliminar espacios y convertir a minúsculas
+    formato = formato.trim().toLowerCase;
+
+    switch(formato){
+    case 'json':
+      return JSON.stringify(datos);
+    default:
+      return '';
+    }
+  
 
 
   }
