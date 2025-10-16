@@ -222,9 +222,7 @@ export const obtenerEstadisticasRecomendaciones = () => {
 
   const promedioValoracion = totalProductosRecomendables
     ? productosRecomendables.reduce(
-      (total, product) => total + product.valoracion,
-      0
-    ) / totalProductosRecomendables
+      (total, product) => total + product.valoracion, 0) / totalProductosRecomendables
     : 0;
 
   const productosDisponiblesPorUsuario = usuarios.map((u) => {
@@ -248,4 +246,73 @@ export const obtenerEstadisticasRecomendaciones = () => {
     promedioValoracion: Number(promedioValoracion),
     productosDisponiblesPorUsuario,
   };
+};
+
+/**
+ * @author Sergio
+ * @description Actualiza las recomendaciones de un usuario cuando hay nuevos datos
+ * @param {number} idUsuario - ID del usuario objetivo
+ * @returns {Array} Array de productos recomendados actualizados
+ */
+export const actualizarRecomendaciones = (
+  idUsuario,
+  numeroRecomendaciones = 5
+) => {
+  const recomendacionesActualizadas = generarRecomendaciones(
+    idUsuario,
+    numeroRecomendaciones
+  );
+  return recomendacionesActualizadas;
+};
+
+/**
+ * @author Sergio
+ * @description Explica por qué se recomienda un producto específico a un usuario
+ * @param {number} idUsuario - ID del usuario objetivo
+ * @param {number} idProducto - ID del producto recomendado
+ * @returns {string} Explicación de la recomendación
+ */
+export const explicarRecomendacion = (idUsuario, idProducto) => {
+  const usuario = usuarios.find((u) => u.id === idUsuario);
+  const producto = productos.find((p) => p.id === idProducto);
+  if (!usuario || !producto) return 'Usuario o producto no encontrado.';
+
+  const patrones = analizarPatronesCompra();
+  const productosComprados = new Set();
+  pedidos.forEach(pedido => {
+    if (pedido.idUsuario === idUsuario) {
+      pedido.productos.forEach(prod => productosComprados.add(prod.idProducto));
+    }
+  });
+
+  const similares = obtenerUsuariosSimilares(idUsuario, 5);
+  const compradoPorSimilares = similares.some(({ usuario: u }) =>
+    pedidos
+      .filter((p) => p.idUsuario === u.id)
+      .some((pedido) =>
+        pedido.productos.some((prod) => prod.idProducto === idProducto)
+      )
+  );
+  if (compradoPorSimilares)
+    return 'Recomendado porque usuarios similares lo han comprado.';
+
+  const categoriasUsuario = patrones.get(usuario.nombre)
+    ? Object.keys(patrones.get(usuario.nombre))
+    : [];
+  if (
+    categoriasUsuario.includes(producto.categoría) &&
+    producto.valoracion >= 4 &&
+    !productosComprados.has(producto.id)
+  ) {
+    return 'Recomendado porque pertenece a tus categorías favoritas y tiene alta valoración.';
+  }
+
+  if (
+    producto.destacado &&
+    usuario.hobbies.some((h) => producto.etiquetas.includes(h.toLowerCase()))
+  ) {
+    return 'Recomendado porque es destacado y coincide con tus hobbies.';
+  }
+
+  return 'Recomendación del sistema';
 };
