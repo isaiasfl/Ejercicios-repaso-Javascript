@@ -152,7 +152,7 @@ export const generarRecomendaciones = (
   const productosCategorias = productos.filter(
     (p) =>
       categoriasUsuario.includes(p.categoría) &&
-      p.valoracion >= 4.5 &&
+      p.valoracion >= 4 &&
       !productosComprados.has(p.id)
   );
 
@@ -171,6 +171,7 @@ export const generarRecomendaciones = (
   );
 
   const recomendaciones = Array.from(recomendacionesSet.values())
+    .filter((product) => product.stock > 0)
     .sort(
       (primerProducto, segundoProducto) =>
         segundoProducto.valoracion - primerProducto.valoracion
@@ -202,4 +203,49 @@ const nuevosProductosDeUsuariosSimilares = (
   });
 
   return productosNuevos;
+};
+
+/**
+ * @author Sergio
+ * @description Devuelve estadísticas del sistema de recomendaciones
+ * Analiza: número de usuarios, productos recomendables, promedio de valoración y stock disponible.
+ * @returns {Object} Estadísticas generales
+ */
+export const obtenerEstadisticasRecomendaciones = () => {
+  const usuariosAnalizados = usuarios.filter((u) => u.activo).length;
+
+  const productosRecomendables = productos.filter(
+    (p) => p.stock > 0 && p.valoracion >= 4.0
+  );
+
+  const totalProductosRecomendables = productosRecomendables.length;
+
+  const promedioValoracion = totalProductosRecomendables
+    ? productosRecomendables.reduce(
+      (total, product) => total + product.valoracion,
+      0
+    ) / totalProductosRecomendables
+    : 0;
+
+  const productosDisponiblesPorUsuario = usuarios.map((u) => {
+    const pedidosUsuario = pedidos.filter((p) => p.idUsuario === u.id);
+    const productosComprados = new Set();
+    pedidosUsuario.forEach((pedido) =>
+      pedido.productos.forEach((prod) =>
+        productosComprados.add(prod.idProducto)
+      )
+    );
+
+    const productosNoComprados = productosRecomendables.filter(
+      (p) => !productosComprados.has(p.id)
+    );
+    return { usuario: u, productosNoComprados };
+  });
+
+  return {
+    usuariosAnalizados,
+    totalProductosRecomendables,
+    promedioValoracion: Number(promedioValoracion),
+    productosDisponiblesPorUsuario,
+  };
 };

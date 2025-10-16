@@ -6,6 +6,8 @@ import {
   analizarPatronesCompra,
   calcularSimilitudUsuarios,
   obtenerUsuariosSimilares,
+  generarRecomendaciones,
+  obtenerEstadisticasRecomendaciones,
 } from './helpers/ejercicio-21/sistemaRecomendaciones';
 
 // Función de inicialización
