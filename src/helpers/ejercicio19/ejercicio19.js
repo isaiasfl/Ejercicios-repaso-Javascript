@@ -101,6 +101,7 @@ const sistemaNotificaciones = ()=>{
 
     console.table(obtenerHistorialNotificaciones());
     console.table(filtrarNotificaciones('exito'));
+    
   }
 
   //demostracionEjercicio19();
