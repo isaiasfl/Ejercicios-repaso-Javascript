@@ -37,4 +37,4 @@ module.exports = {
     // Evitar console.log en producción (advertencia)
     'no-console': 'warn'
   }
-}
+};
