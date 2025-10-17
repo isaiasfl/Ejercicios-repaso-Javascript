@@ -3,7 +3,9 @@
  * Este archivo puede contener la inicialización y configuración global
  */
 
-import { act } from "react";
+import carritoCompras from './helpers/ejercicio-14/carritoCompras';
+
+
 
 
 // Función de inicialización
@@ -12,6 +14,7 @@ export function initializeApp() {
   
   // Aquí puedes configurar el estado inicial de tu aplicación
   // Por ejemplo: variables globales, configuraciones, etc.
+  
 }
 
 
