@@ -174,6 +174,7 @@ export function tablaDatos(){
     filtrarTabla,
     exportarTabla,
     demostracionEjercicio17
+    
   };
   
 
