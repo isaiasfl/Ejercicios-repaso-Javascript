@@ -31,6 +31,7 @@ export const sistemasFavoritos = () => {
         .push(fav);
       localStorage.setItem('favoritosProductos', JSON.stringify(favoritosProductos));
       console.log('Producto añadido: ', fav); 
+      return fav;
     }else{
       const usuario = usuarios
         .find(u => u.id === id);
@@ -47,6 +48,7 @@ export const sistemasFavoritos = () => {
         .push(favU);
       localStorage.setItem('favoritosUsuarios', JSON.stringify(favoritosUsuarios)); 
       console.log('Usuario añadido: ', favU); 
+      return favU;
     }
    
   };
@@ -67,7 +69,7 @@ export const sistemasFavoritos = () => {
         .filter(p => p.id !== id);
       if (!producto) {
         console.log(`No existe producto con id ${id}`);
-        return;
+        return false;
       }
       const fav = {
         tipo, 
@@ -76,13 +78,14 @@ export const sistemasFavoritos = () => {
       };
       localStorage.setItem('favoritosProductos', JSON.stringify(favoritosProductos));
       console.log(`Producto con id ${id} eliminado.`);
+      return true;
       
     }else{
       const usuario = usuarios
         .filter(u => u.id !== id);
       if (!usuario) {
         console.log(`No existe producto con id ${id}`);
-        return;
+        return false;
       }
       const favU = {
         tipo, 
@@ -91,6 +94,7 @@ export const sistemasFavoritos = () => {
       };
       localStorage.setItem('favoritosUsuarios', JSON.stringify(favoritosUsuarios));
       console.log(`Usuario con id ${id} eliminado.`);
+      return true;
 
     }
   };
@@ -221,11 +225,12 @@ export const sistemasFavoritos = () => {
       coleccion.push(favorito);
     }
     console.log('Colección "' + nombre + '":', coleccion);
+    return coleccion;
   };
 
   const demostracionEjercicio15 = () => {
-    agregarFavorito('usuario', 1);
-    agregarFavorito('producto', 102);
+    console.log(agregarFavorito('usuario', 1));
+    console.log(agregarFavorito('producto', 102));
     console.log(agregarFavorito('producto', 103));
     console.log(eliminarFavorito('producto', 102));
     console.log(esFavorito('producto', 103)); 
