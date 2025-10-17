@@ -44,7 +44,7 @@ export const analizarPatronesCompra = () => {
  * @param {number} idUsuario2 - usuario
  * @returns {number} Índice de similitud
  */
-export const calcularSimilitudUsuarios = (idUsuario1, idUsuario2) => {
+export const calcularSimilitudUsuarios = (idUsuario1 = 1, idUsuario2 = 1) => {
   const usuario1 = usuarios.find((u) => u.id === idUsuario1);
   const usuario2 = usuarios.find((u) => u.id === idUsuario2);
   if (!usuario1 || !usuario2) {
@@ -100,7 +100,7 @@ export const calcularSimilitudUsuarios = (idUsuario1, idUsuario2) => {
  * @param {number} limite - Número máximo de usuarios a devolver
  * @returns {Array} Array de objetos con { usuario, similitud }
  */
-export const obtenerUsuariosSimilares = (idUsuario, limite = 1) => {
+export const obtenerUsuariosSimilares = (idUsuario = 1, limite = 1) => {
   const usuarioReferencia = usuarios.find((u) => u.id === idUsuario);
   if (!usuarioReferencia) {
     return [];
@@ -125,45 +125,63 @@ export const obtenerUsuariosSimilares = (idUsuario, limite = 1) => {
  * @param {number} numeroRecomendaciones - Número máximo de productos a recomendar
  * @returns {Array} Array de objetos con estructura { producto, puntuacion, razones, usuariosSimilaresQueCompraron, categoriaRelacionada }
  */
-export const generarRecomendaciones = (idUsuario, numeroRecomendaciones = 5) => {
-  const usuario = usuarios.find(u => u.id === idUsuario);
+export const generarRecomendaciones = (
+  idUsuario = 1,
+  numeroRecomendaciones = 5
+) => {
+  const usuario = usuarios.find((u) => u.id === idUsuario);
   if (!usuario) return [];
 
   const patrones = analizarPatronesCompra();
-  const pedidosUsuario = pedidos.filter(p => p.idUsuario === idUsuario);
+  const pedidosUsuario = pedidos.filter((p) => p.idUsuario === idUsuario);
   const productosComprados = new Set();
-  pedidosUsuario.forEach(pedido =>
-    pedido.productos.forEach(p => productosComprados.add(p.idProducto))
+  pedidosUsuario.forEach((pedido) =>
+    pedido.productos.forEach((p) => productosComprados.add(p.idProducto))
   );
 
   const similares = obtenerUsuariosSimilares(idUsuario, 5);
 
-  const productosSimilares = nuevosProductosDeUsuariosSimilares(similares, productosComprados);
+  const productosSimilares = nuevosProductosDeUsuariosSimilares(
+    similares,
+    productosComprados
+  );
 
   const categoriasUsuario = patrones.get(usuario.nombre)
     ? Object.keys(patrones.get(usuario.nombre))
     : [];
   const productosCategorias = productos.filter(
-    p => categoriasUsuario.includes(p.categoría) && p.valoracion >= 4 && !productosComprados.has(p.id)
+    (p) =>
+      categoriasUsuario.includes(p.categoría) &&
+      p.valoracion >= 4 &&
+      !productosComprados.has(p.id)
   );
 
   const productosHobbies = productos.filter(
-    p => p.destacado && usuario.hobbies.some(h => p.etiquetas.includes(h.toLowerCase())) && !productosComprados.has(p.id)
+    (p) =>
+      p.destacado &&
+      usuario.hobbies.some((h) => p.etiquetas.includes(h.toLowerCase())) &&
+      !productosComprados.has(p.id)
   );
 
-  const todosProductos = [...productosSimilares, ...productosCategorias, ...productosHobbies];
+  const todosProductos = [
+    ...productosSimilares,
+    ...productosCategorias,
+    ...productosHobbies,
+  ];
 
   const recomendacionesMap = new Map();
 
-  todosProductos.forEach(p => {
+  todosProductos.forEach((p) => {
     const razones = [];
     let puntuacion = 0;
 
     const usuariosQueCompraron = similares
-      .filter(({ usuario: u }) => 
+      .filter(({ usuario: u }) =>
         pedidos
-          .filter(pedido => pedido.idUsuario === u.id)
-          .some(pedido => pedido.productos.some(prod => prod.idProducto === p.id))
+          .filter((pedido) => pedido.idUsuario === u.id)
+          .some((pedido) =>
+            pedido.productos.some((prod) => prod.idProducto === p.id)
+          )
       )
       .map(({ usuario: u }) => u.id);
 
@@ -173,11 +191,16 @@ export const generarRecomendaciones = (idUsuario, numeroRecomendaciones = 5) => 
     }
 
     if (categoriasUsuario.includes(p.categoría) && p.valoracion >= 4) {
-      razones.push('Pertenece a tus categorías favoritas y tiene alta valoración');
+      razones.push(
+        'Pertenece a tus categorías favoritas y tiene alta valoración'
+      );
       puntuacion += 30;
     }
 
-    if (p.destacado && usuario.hobbies.some(h => p.etiquetas.includes(h.toLowerCase()))) {
+    if (
+      p.destacado &&
+      usuario.hobbies.some((h) => p.etiquetas.includes(h.toLowerCase()))
+    ) {
       razones.push('Producto destacado coincide con tus hobbies');
       puntuacion += 30;
     }
@@ -189,23 +212,24 @@ export const generarRecomendaciones = (idUsuario, numeroRecomendaciones = 5) => 
       puntuacion,
       razones,
       usuariosSimilaresQueCompraron: usuariosQueCompraron,
-      categoriaRelacionada: categoriasUsuario.includes(p.categoría) ? p.categoría : ''
+      categoriaRelacionada: categoriasUsuario.includes(p.categoría)
+        ? p.categoría
+        : '',
     });
   });
 
   return Array.from(recomendacionesMap.values())
-    .filter(p => p.producto.stock > 0)
+    .filter((p) => p.producto.stock > 0)
     .sort((a, b) => b.puntuacion - a.puntuacion)
     .slice(0, numeroRecomendaciones);
 };
-
 
 /**
  * @description Auxiliar para generarRecomendaciones: devuelve productos comprados por usuarios similares que el usuario objetivo no ha comprado
  */
 const nuevosProductosDeUsuariosSimilares = (
-  usuariosSimilares,
-  productosComprados
+  usuariosSimilares = [],
+  productosComprados = []
 ) => {
   const productosNuevos = [];
 
@@ -240,8 +264,10 @@ export const obtenerEstadisticasRecomendaciones = () => {
   const totalProductosRecomendables = productosRecomendables.length;
 
   const promedioValoracion = totalProductosRecomendables
-    ? productosRecomendables.reduce(
-      (total, product) => total + product.valoracion, 0) / totalProductosRecomendables
+    ? (productosRecomendables.reduce(
+      (total, product) => total + product.valoracion,
+      0
+    ) / totalProductosRecomendables)
     : 0;
 
   const productosDisponiblesPorUsuario = usuarios.map((u) => {
@@ -273,7 +299,7 @@ export const obtenerEstadisticasRecomendaciones = () => {
  * @param {number} idUsuario - ID del usuario objetivo
  * @returns {Array} Array de productos recomendados actualizados
  */
-export const actualizarRecomendaciones = (idUsuario) => {
+export const actualizarRecomendaciones = (idUsuario = 1) => {
   const recomendacionesActualizadas = generarRecomendaciones(idUsuario);
   return recomendacionesActualizadas;
 };
@@ -285,16 +311,18 @@ export const actualizarRecomendaciones = (idUsuario) => {
  * @param {number} idProducto - ID del producto recomendado
  * @returns {string} Explicación de la recomendación
  */
-export const explicarRecomendacion = (idUsuario, idProducto) => {
+export const explicarRecomendacion = (idUsuario = 1, idProducto = 101) => {
   const usuario = usuarios.find((u) => u.id === idUsuario);
   const producto = productos.find((p) => p.id === idProducto);
   if (!usuario || !producto) return 'Usuario o producto no encontrado.';
 
   const patrones = analizarPatronesCompra();
   const productosComprados = new Set();
-  pedidos.forEach(pedido => {
+  pedidos.forEach((pedido) => {
     if (pedido.idUsuario === idUsuario) {
-      pedido.productos.forEach(prod => productosComprados.add(prod.idProducto));
+      pedido.productos.forEach((prod) =>
+        productosComprados.add(prod.idProducto)
+      );
     }
   });
 
@@ -339,14 +367,14 @@ export const obtenerTendencias = () => {
   const productosContador = new Map();
   const categoriasContador = new Map();
 
-  usuarios.forEach(usuario => {
+  usuarios.forEach((usuario) => {
     const similares = obtenerUsuariosSimilares(usuario.id, 5);
 
     similares.forEach(({ usuario: u }) => {
-      const pedidosUsuario = pedidos.filter(p => p.idUsuario === u.id);
-      pedidosUsuario.forEach(pedido => {
-        pedido.productos.forEach(p => {
-          const producto = productos.find(prod => prod.id === p.idProducto);
+      const pedidosUsuario = pedidos.filter((p) => p.idUsuario === u.id);
+      pedidosUsuario.forEach((pedido) => {
+        pedido.productos.forEach((p) => {
+          const producto = productos.find((prod) => prod.id === p.idProducto);
           if (!producto) return;
 
           productosContador.set(
@@ -376,7 +404,7 @@ export const obtenerTendencias = () => {
 
   return {
     productos: productosPopulares,
-    categorias: categoriasPopulares
+    categorias: categoriasPopulares,
   };
 };
 
@@ -385,9 +413,9 @@ export const obtenerTendencias = () => {
  * @description Guarda las recomendaciones generadas para un usuario en localStorage
  * @param {number} idUsuario - ID del usuario objetivo
  */
-export const guardarRecomendacionesLocalStorage = (idUsuario) => {
+export const guardarRecomendacionesLocalStorage = (idUsuario = 1) => {
   const recomendaciones = generarRecomendaciones(idUsuario);
-  
+
   if (!recomendaciones || recomendaciones.length === 0) return;
 
   localStorage.setItem(
@@ -404,12 +432,14 @@ export const guardarRecomendacionesLocalStorage = (idUsuario) => {
 export const compararEfectividad = () => {
   const resultados = [];
 
-  usuarios.forEach(usuario => {
+  usuarios.forEach((usuario) => {
     const recomendaciones = generarRecomendaciones(usuario.id, 5);
 
     if (recomendaciones.length === 0) return;
 
-    const aceptadas = recomendaciones.filter(p => p.stock > 0 && p.valoracion >= 4.0).length;
+    const aceptadas = recomendaciones.filter(
+      (p) => p.stock > 0 && p.valoracion >= 4.0
+    ).length;
 
     const porcentajeAceptacion = (aceptadas / recomendaciones.length) * 100;
 
@@ -417,17 +447,36 @@ export const compararEfectividad = () => {
       usuario: usuario.nombre,
       totalRecomendaciones: recomendaciones.length,
       aceptadas,
-      porcentajeAceptacion: Number(porcentajeAceptacion)
+      porcentajeAceptacion: Number(porcentajeAceptacion),
     });
   });
 
   const promedioAceptacion =
     resultados.length > 0
-      ? resultados.reduce((total, r) => total + r.porcentajeAceptacion, 0) / resultados.length
+      ? resultados.reduce((total, r) => total + r.porcentajeAceptacion, 0) /
+        resultados.length
       : 0;
 
   return {
     promedioAceptacion: Number(promedioAceptacion),
-    detalles: resultados
+    detalles: resultados,
   };
 };
+
+export const tests = () => {
+  console.log('RECOMENDACIONES');
+  console.table(generarRecomendaciones(1, 2));
+  console.table(generarRecomendaciones(2, 2));
+  console.table(generarRecomendaciones(3, 2));
+  console.log('SIMILITUD');
+  console.table(calcularSimilitudUsuarios(1,2));
+  console.table(calcularSimilitudUsuarios(2,3));
+  console.table(calcularSimilitudUsuarios(1,3));
+  console.log('EXPLICAR RECOMENDACION');
+  console.log(explicarRecomendacion(2,101));
+  console.log('OBTENER ESTADISTICAS');
+  console.table(obtenerEstadisticasRecomendaciones());
+};
+
+// INICIALIZAR APLICACION
+tests();
