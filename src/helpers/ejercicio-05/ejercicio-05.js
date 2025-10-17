@@ -1,3 +1,4 @@
+import { usuarios } from '../../db/data';
 
 //-----------------------Filtrar Por Nivel Usuario
 
@@ -7,10 +8,8 @@
  * @param {String} nivel Es el nivel que tiene cada usuario
  * @returns {object} Retorna un Array de usuarios y los usuarios tendrán el nivel pedido
  */
-export const filterByNivelUser = (arrayUsers, nivel) =>
-  arrayUsers
-    .filter((user) => user.nivel.toLowerCase() === nivel.toLowerCase());
-
+const filterByNivelUser = (arrayUsers, nivel) =>
+  arrayUsers.filter((user) => user.nivel.toLowerCase() === nivel.toLowerCase());
 
 //-----------------------Comparar Grupos
 
@@ -19,18 +18,16 @@ export const filterByNivelUser = (arrayUsers, nivel) =>
  * @param {object} arrayUsers Un array de usuarios
  * @returns {object} Devuelve los resultados de la media de cada grupo de nivel
  */
-export const compareGroups = (arrayUsers) => {
+const compareGroups = (arrayUsers) => {
   const niveles = ['básico', 'estándar', 'premium'];
-  const resultado = niveles
-    .map((nivel) => {
-      const grupo = filterByNivelUser(arrayUsers, nivel);
-      const puntosMedios = grupo
-        .reduce((acc, usuario) => acc + usuario.puntos, 0) / grupo.length;
-      return { nivel, puntosMedios };
-    });
+  const resultado = niveles.map((nivel) => {
+    const grupo = filterByNivelUser(arrayUsers, nivel);
+    const puntosMedios =
+      grupo.reduce((acc, usuario) => acc + usuario.puntos, 0) / grupo.length;
+    return { nivel, puntosMedios };
+  });
   return resultado;
 };
-
 
 //------------------------Usuarios destacados según criterio
 
@@ -40,28 +37,28 @@ export const compareGroups = (arrayUsers) => {
  * @param {String} criterio El criterio de como los quieres filtrar
  * @returns {object} Devuelve un array con los usuarios destacados según el criterio
  */
-export function getFeaturedUsers(arrayUsers, criterio) {
+function getFeaturedUsers(arrayUsers, criterio) {
   switch (criterio) {
-  case 'puntos': {
-    const puntosMax = Math
-      .max(...arrayUsers
-        .map((usuario) => usuario.puntos));
-    return arrayUsers.filter((usuario) => usuario.puntos === puntosMax);
-  }
-  case 'activos':
-    return arrayUsers.filter((usuario) => usuario.activo);
+    case 'puntos': {
+      const puntosMax = Math.max(
+        ...arrayUsers.map((usuario) => usuario.puntos)
+      );
+      return arrayUsers.filter((usuario) => usuario.puntos === puntosMax);
+    }
+    case 'activos':
+      return arrayUsers.filter((usuario) => usuario.activo);
 
-  case 'premium':
-    return arrayUsers.filter((usuario) => usuario.nivel === 'premium');
+    case 'premium':
+      return arrayUsers.filter((usuario) => usuario.nivel === 'premium');
 
-  case 'estándar':
-    return arrayUsers.filter((usuario) => usuario.nivel === 'estándar');
+    case 'estándar':
+      return arrayUsers.filter((usuario) => usuario.nivel === 'estándar');
 
-  case 'básico':
-    return arrayUsers.filter((usuario) => usuario.nivel === 'básico');
+    case 'básico':
+      return arrayUsers.filter((usuario) => usuario.nivel === 'básico');
 
-  default:
-    return [];
+    default:
+      return [];
   }
 }
 
@@ -72,33 +69,52 @@ export function getFeaturedUsers(arrayUsers, criterio) {
  * @param {object} arrayUsers Array de usuarios
  * @returns {object} Devuelve un objeto con el resultado de cada estadística
  */
-export const obtenerEstadisticasUsuarios = (arrayUsers) => {
+const obtenerEstadisticasUsuarios = (arrayUsers) => {
   //edad Media
-  const edadMedia = arrayUsers
-    .reduce( (acc, usuario) => acc+usuario.edad, 0)/arrayUsers.length;
+  const edadMedia =
+    arrayUsers.reduce((acc, usuario) => acc + usuario.edad, 0) /
+    arrayUsers.length;
 
   //User mas mayor
-  const usuarioMaxEdad = Math
-    .max(...arrayUsers
-      .map((usuario) => usuario.edad));
-  const userMayor = arrayUsers.filter((usuario) => usuario.edad === usuarioMaxEdad);
+  const usuarioMaxEdad = Math.max(...arrayUsers.map((usuario) => usuario.edad));
+  const userMayor = arrayUsers.filter(
+    (usuario) => usuario.edad === usuarioMaxEdad
+  );
 
   //User mas pequeño
-  const usuarioMinEdad = Math
-    .min(...arrayUsers
-      .map((usuario) => usuario.edad));
-  const userMenor = arrayUsers.filter((usuario) => usuario.edad === usuarioMinEdad);
+  const usuarioMinEdad = Math.min(...arrayUsers.map((usuario) => usuario.edad));
+  const userMenor = arrayUsers.filter(
+    (usuario) => usuario.edad === usuarioMinEdad
+  );
 
   //cuantos usuarios hay por ciudad
   const ciudades = [...new Set(arrayUsers.map((usuario) => usuario.ciudad))];
 
-  const numCiudad = ciudades
-    .map( ciudad => arrayUsers
-      .reduce((acc, usuario) => acc+(usuario.ciudad===ciudad?1:0) ,0));
+  const numCiudad = ciudades.map((ciudad) =>
+    arrayUsers.reduce(
+      (acc, usuario) => acc + (usuario.ciudad === ciudad ? 1 : 0),
+      0
+    )
+  );
 
   //Porcentaje de usuarios activos
   const usersActivos = getFeaturedUsers(arrayUsers, 'activos');
-  const porcentaje = (usersActivos.length*100)/arrayUsers.length;
+  const porcentaje = (usersActivos.length * 100) / arrayUsers.length;
 
-  return { edadMedia, userMayor, userMenor, numCiudad, porcentaje};
+  return {
+    edadMedia,
+    userMayor,
+    userMenor,
+    numCiudad,
+    porcentaje,
+  };
 };
+
+const demostracionEjercicio05 = () => {
+  console.log(filterByNivelUser(usuarios, 'estándar'));
+  console.table(compareGroups(usuarios));
+  console.log(getFeaturedUsers(usuarios, 'puntos'));
+  console.log(obtenerEstadisticasUsuarios(usuarios));
+};
+
+export default demostracionEjercicio05;
