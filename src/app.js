@@ -3,6 +3,9 @@
  * Este archivo puede contener la inicialización y configuración global
  */
 
+import { act } from "react";
+
+
 // Función de inicialización
 export function initializeApp() {
   console.log('Inicializando aplicación...');
@@ -10,4 +13,5 @@ export function initializeApp() {
   // Aquí puedes configurar el estado inicial de tu aplicación
   // Por ejemplo: variables globales, configuraciones, etc.
 }
+
 
