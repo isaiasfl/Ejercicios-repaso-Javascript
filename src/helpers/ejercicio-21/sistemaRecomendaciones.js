@@ -461,6 +461,10 @@ export const sistemaRecomendaciones = () => {
     };
   };
 
+  /**
+   * @author Sergio
+   * @description Llama a las funciones para ejecutarlas y comprobar los tests
+   */
   const demostracionEjercicio21 = () => {
     console.log('RECOMENDACIONES');
     console.table(generarRecomendaciones(1, 5));
@@ -472,15 +476,13 @@ export const sistemaRecomendaciones = () => {
     console.table(calcularSimilitudUsuarios(1, 1));
     console.log('EXPLICAR RECOMENDACION');
     console.log(explicarRecomendacion(2, 101));
+    console.log(explicarRecomendacion(2, 102));
     console.log('OBTENER ESTADISTICAS');
-    console.table(obtenerEstadisticasRecomendaciones());
+    console.log(obtenerEstadisticasRecomendaciones());
     console.log('DIFERENTES PONDERACIONES');
     console.log(calcularSimilitudUsuarios(4, 2, 0.5, 0.1, 0.1, 0.3));
     console.log(calcularSimilitudUsuarios(4, 2, 0.2, 0.4, 0.2, 0.2));
   };
-
-  // INICIALIZAR APLICACION
-  //tests();
   return { analizarPatronesCompra, calcularSimilitudUsuarios, obtenerUsuariosSimilares, generarRecomendaciones, nuevosProductosDeUsuariosSimilares, obtenerEstadisticasRecomendaciones, actualizarRecomendaciones, explicarRecomendacion, obtenerTendencias, guardarRecomendacionesLocalStorage, compararEfectividad, demostracionEjercicio21 };
 };
 
