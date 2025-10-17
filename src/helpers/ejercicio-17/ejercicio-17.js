@@ -117,7 +117,7 @@ export function tablaDatos(){
     // Validar que formato sea un string válido y no esté vacío
     if(typeof formato !=='string' ||formato.trim()==='')return '';
     // Normalizar el formato: eliminar espacios y convertir a minúsculas
-    formato = formato.trim().toLowerCase;
+    formato = formato.trim().toLowerCase();
 
     switch(formato){
     case 'json':
@@ -126,15 +126,58 @@ export function tablaDatos(){
       return '';
     }
   
-
-
   }
-
-
-
-
-
-
+  function demostracionEjercicio17() {
+    console.log('🚀 === EJERCICIO 17: SISTEMA DE TABLAS ===\n');
+  
+    const tabla = tablaDatos();
+  
+    // 1. CREAR TABLA
+    console.log('1️⃣ CREAR TABLA');
+    const miTabla = tabla.crearTabla(usuarios, ['nombre', 'email', 'edad']);
+ 
+    console.table(miTabla.filas);
+    console.log('\n');
+  
+    // 2. ORDENAR
+    console.log('2️⃣ ORDENAR por edad (descendente)');
+    const ordenados = tabla.ordenarTabla(usuarios, 'edad', 'desc');
+    console.table(ordenados.slice(0, 5));
+    console.log('\n');
+  
+    // 3. FILTRAR
+    console.log('3️⃣ FILTRAR "ana"');
+    const filtrados = tabla.filtrarTabla(usuarios, 'ana');
+    console.table(filtrados);
+    console.log('\n');
+  
+    // 4. PAGINAR
+    console.log('4️⃣ PAGINAR (página 1, 3 elementos)');
+    const paginados = tabla.paginarTabla(usuarios, 1, 3);
+    console.table(paginados);
+    console.log('\n');
+  
+    // 5. EXPORTAR
+    console.log('5️⃣ EXPORTAR a JSON (primeros 3)');
+    const json = tabla.exportarTabla(usuarios.slice(0, 3), 'json');
+    console.log(json);
+    console.log('\n');
   
 
+    console.log('\n✅ Ejercicio 17 completado\n');
+  }
+
+  return {
+    crearTabla,
+    ordenarTabla,
+    paginarTabla,
+    filtrarTabla,
+    exportarTabla,
+    demostracionEjercicio17
+  };
+  
+
+
 }
+ 
+
