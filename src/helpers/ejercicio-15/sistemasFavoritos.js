@@ -1,26 +1,27 @@
-import { usuarios, productos } from './data.js';
+import { usuarios, productos } from '../../db/data.js';
 
 let favoritosUsuarios = [];
 let favoritosProductos = [];
-
-// Hacer un módulo, una funcion grande llamada sistemasFavoritos que tenga 
-// dentro el resto de funciones y en la ultima línea antes del cierre 
-// se pone un return con todas las funciones que incluyen
-// para que luego el destructuring puedas sacar lo que quieras
 
 export const sistemasFavoritos = () => {
     
   /**
  * Añadir un elemento a favoritos
- * @author // Rita Vicente Dominguez
+ * @author Rita Vicente Dominguez
  * @param {String} tipo 
  * @param {Number} id 
- * Devuelve en el array favoritos que correnda el favorito añadido
+ * @returns {Array} 
+ * 
  */
   const agregarFavorito = (tipo = 'usuario', id=1) => {
     if (tipo === 'producto'){
+
       const producto = productos
         .find(p => p.id === id);
+      if (!producto) {
+        console.log(`No existe producto con id ${id}`);
+        return;
+      }
       const fav = {
         tipo, 
         id, 
@@ -33,6 +34,10 @@ export const sistemasFavoritos = () => {
     }else{
       const usuario = usuarios
         .find(u => u.id === id);
+      if (!usuario) {
+        console.log(`No existe usuario con id ${id}`);
+        return;
+      }
       const favU = {
         tipo, 
         id, 
@@ -42,20 +47,28 @@ export const sistemasFavoritos = () => {
         .push(favU);
       localStorage.setItem('favoritosUsuarios', JSON.stringify(favoritosUsuarios)); 
       console.log('Usuario añadido: ', favU); 
-    
-
     }
    
   };
-  console.log(agregarFavorito('usuario', 1));
-  console.log(agregarFavorito('producto', 2));
+  
 
-
+  /**
+   * Eliminar un elemento de favoritos
+  /**
+   * @author Rita Vicente
+   * @param {String} tipo 
+   * @param {Number} id 
+   * @returns {array}
+   */
 
   const eliminarFavorito = (tipo = 'usuario', id= 1) => {
     if (tipo === 'producto'){
       const producto = productos
-        .find(p => p.id !== id);
+        .filter(p => p.id !== id);
+      if (!producto) {
+        console.log(`No existe producto con id ${id}`);
+        return;
+      }
       const fav = {
         tipo, 
         id, 
@@ -64,12 +77,31 @@ export const sistemasFavoritos = () => {
       localStorage.setItem('favoritosProductos', JSON.stringify(favoritosProductos));
       console.log(`Producto con id ${id} eliminado.`);
       
+    }else{
+      const usuario = usuarios
+        .filter(u => u.id !== id);
+      if (!usuario) {
+        console.log(`No existe producto con id ${id}`);
+        return;
+      }
+      const favU = {
+        tipo, 
+        id, 
+        fecha: new Date().toISOString()
+      };
+      localStorage.setItem('favoritosUsuarios', JSON.stringify(favoritosUsuarios));
+      console.log(`Usuario con id ${id} eliminado.`);
+
     }
-
   };
-  eliminarFavorito('producto', 2);
 
-
+  /**
+   * Comprueba si un elemento es favorito
+   * @author Rita Vicente 
+   * @param {String} tipo 
+   * @param {Number} id 
+   * @returns {Boolean}
+   */
   const esFavorito = (tipo = 'usuario', id = 1) => {
     if (tipo === 'producto'){
       const ids = favoritosProductos
@@ -81,10 +113,15 @@ export const sistemasFavoritos = () => {
       return ids.includes(id);
     }
   }; 
-  console.log(esFavorito('producto', 2)); 
-  console.log(esFavorito('producto', 5));
+ 
 
-
+  /**
+   * Devuelve todos los favoritos de un tipo
+   * @author Rita Vicente
+   * @param {String} tipo 
+   * @returns {Array}
+   * 
+   */
   const obtenerFavoritos= (tipo= 'usuario') => {
     if (tipo === 'producto'){
       return favoritosProductos;
@@ -92,45 +129,65 @@ export const sistemasFavoritos = () => {
       return favoritosUsuarios;
     }
   };
-  console.log(obtenerFavoritos('usuario'));
+  
 
-
+  /**
+   * Devuelve los favoritos con todos los detalles
+   * @author Rita Vicente
+   * @param {String} tipo 
+   * @returns {Array}
+   */
   const obtenerFavoritosConDetalles = (tipo = 'usuario') => {
     if (tipo === 'producto'){
       return favoritosProductos
-        .map(p => {
+        .map(fav => {
           const producto = productos
-            .find(p => p.id === p.id);
+            .find(p => p.id === fav.id);
           return {
-            ...p,
+            ...fav,
             ...producto,
           };
         });
 
     }else{
-      return favoritosUsuarios.map(fav => {
-        const usuario = usuarios.find(u => u.id === fav.id);
+      return favoritosUsuarios.map(us => {
+        const usuario = usuarios.find(u => u.id === us.id);
         return {
-          ...fav,
+          ...us,
           ...usuario
         };
       });
     }  
   };
-  console.log(obtenerFavoritosConDetalles('usuario'));
+  
 
-  const filtrarFavsDate = (tipo = 'usuario', fecha = new Date().toISOString()) => {
+  /**
+   * Filtrar favoritos por fecha de adición
+   * @author Rita Vicente
+   * @param {String} tipo 
+   * @param {String} fecha 
+   * @returns {Array}
+   */
+  const filtrarFavsDate = (tipo = 'usuario', fecha = new Date().toISOString().slice(0, 10 )) => {
     if (tipo === 'producto'){
       return favoritosProductos
-        .filter(f => f.fecha === fecha);
+        .filter(f => f.fecha.slice(0, 10) === fecha);
     }else{
       return favoritosUsuarios
-        .filter(f => f.fecha === fecha);
+        .filter(f => f.fecha.slice(0, 10) === fecha);
 
     }
   };
-  console.log(filtrarFavsDate('usuario', '2022-01-15'));
+  
 
+
+  /**
+   * Buscar dentro de los favoritos
+   * @author Rita Vicente
+   * @param {String} tipo 
+   * @param {String} texto 
+   * @returns {String}
+   */
   const buscarDentroFavorito = (tipo = 'usuario', texto = 'ana') => {
     const favsDetallados = obtenerFavoritosConDetalles(tipo);
     const palabra = texto.toLowerCase();
@@ -140,7 +197,51 @@ export const sistemasFavoritos = () => {
     });
      
   };
-  console.log(buscarDentroFavorito('usuario', 'ana'));
-
   
+
+
+  /**
+   * Crear colecciones personalizadas de favoritos
+   * @author Rita Vicente
+   * @param {String} tipo 
+   * @param {String} nombre 
+   * @param {Number} id 
+   */
+  const crearColecciones = (tipo, nombre, id) => {
+    let lista;
+  
+    if (tipo === 'producto') {
+      lista = favoritosProductos;
+    } else {
+      lista = favoritosUsuarios;
+    }
+    const favorito = lista.find(f => f.id === id);
+    const coleccion = [];
+    if (favorito) {
+      coleccion.push(favorito);
+    }
+    console.log('Colección "' + nombre + '":', coleccion);
+  };
+
+  const demostracionEjercicio15 = () => {
+    agregarFavorito('usuario', 1);
+    agregarFavorito('producto', 102);
+    console.log(agregarFavorito('producto', 103));
+    console.log(eliminarFavorito('producto', 102));
+    console.log(esFavorito('producto', 103)); 
+    console.log(esFavorito('producto', 105));
+    console.log(obtenerFavoritos('usuario'));
+    console.log(obtenerFavoritosConDetalles('usuario'));
+    console.log(filtrarFavsDate('usuario', '2022-01-15'));
+    console.log(buscarDentroFavorito('usuario', 'ana'));
+    console.log(filtrarFavsDate('usuario', '2025-10-17'));
+    console.log(crearColecciones('producto', 'Productos favoritos', 102));
+    
+
+  };
+  demostracionEjercicio15();
+
+  return {agregarFavorito, eliminarFavorito, esFavorito, obtenerFavoritos, obtenerFavoritosConDetalles, filtrarFavsDate, buscarDentroFavorito, crearColecciones, demostracionEjercicio15};
 };
+
+
