@@ -122,7 +122,7 @@ const dashboardDatos = (() => {
 })(); 
 /**
  * Funcion que ejecuta la aplicacion 
- */
+ */ 
 export function demostracionEjercicio20(){
   console.log('=== 🧭 DASHBOARD DE DATOS ===');
   dashboardDatos.crearResumenUsuarios();
